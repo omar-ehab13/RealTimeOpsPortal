@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RealTimeOpsPortal.Domain.Requests;
 using RealTimeOpsPortal.Domain.Users;
+using RealTimeOpsPortal.Infrastructure.Persistence.Authentication;
 
 namespace RealTimeOpsPortal.Infrastructure.Persistence;
 
@@ -14,6 +15,9 @@ public class AppDbContext : DbContext
 
     public DbSet<ApplicationUser> Users =>
         Set<ApplicationUser>();
+
+    public DbSet<UserCredential> UserCredentials =>
+    Set<UserCredential>();
 
     public DbSet<ServiceRequest> ServiceRequests =>
         Set<ServiceRequest>();

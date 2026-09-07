@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RealTimeOpsPortal.Application.Authentication;
+using RealTimeOpsPortal.Infrastructure.Authentication;
 using RealTimeOpsPortal.Infrastructure.Persistence;
 
 namespace RealTimeOpsPortal.Infrastructure;
@@ -20,6 +22,18 @@ public static class DependencyInjection
         {
             options.UseSqlServer(connectionString);
         });
+
+        services.AddScoped<
+            IUserAuthenticationRepository,
+            UserAuthenticationRepository>();
+
+        services.AddSingleton<
+            IPasswordHasher,
+            PasswordHasherService>();
+
+        services.AddSingleton<
+            ITokenService,
+            JwtTokenService>();
 
         return services;
     }
