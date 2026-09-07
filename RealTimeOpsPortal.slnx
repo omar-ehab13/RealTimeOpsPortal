@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RealTimeOpsPortal.Api/RealTimeOpsPortal.Api.csproj" />
+    <Project Path="src/RealTimeOpsPortal.Application/RealTimeOpsPortal.Application.csproj" />
+    <Project Path="src/RealTimeOpsPortal.Domain/RealTimeOpsPortal.Domain.csproj" />
+    <Project Path="src/RealTimeOpsPortal.Infrastructure/RealTimeOpsPortal.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RealTimeOpsPortal.IntegrationTests/RealTimeOpsPortal.IntegrationTests.csproj" />
+    <Project Path="tests/RealTimeOpsPortal.UnitTests/RealTimeOpsPortal.UnitTests.csproj" />
+  </Folder>
+</Solution>
