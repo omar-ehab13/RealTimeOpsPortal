@@ -3,18 +3,22 @@ using RealTimeOpsPortal.Application.Authentication;
 
 namespace RealTimeOpsPortal.Infrastructure.Authentication;
 
-public class PasswordHasherService : IPasswordHasher
+public sealed class PasswordHasherService : IPasswordHasher
 {
-    private readonly PasswordHasher<object> _passwordHasher = new();
+    private readonly PasswordHasher<string> _passwordHasher = new();
 
-    public string Hash(string password) 
-        => _passwordHasher.HashPassword(null!, password);
+    public string Hash(string password)
+    {
+        return _passwordHasher.HashPassword(
+            string.Empty,
+            password);
+    }
 
     public bool Verify(string password, string passwordHash)
     {
         var result =
             _passwordHasher.VerifyHashedPassword(
-                null!,
+                string.Empty,
                 passwordHash,
                 password);
 

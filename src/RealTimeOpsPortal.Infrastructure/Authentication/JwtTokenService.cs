@@ -51,7 +51,7 @@ public class JwtTokenService : ITokenService
                 user.Email),
 
             new Claim(
-                ClaimTypes.Role,
+                "role",
                 user.Role.ToString()),
 
             new Claim(

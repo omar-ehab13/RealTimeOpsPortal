@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RealTimeOpsPortal.Application.Authentication;
 using RealTimeOpsPortal.Infrastructure.Authentication;
 using RealTimeOpsPortal.Infrastructure.Persistence;
+using RealTimeOpsPortal.Infrastructure.Persistence.Seed;
 
 namespace RealTimeOpsPortal.Infrastructure;
 
@@ -34,6 +35,8 @@ public static class DependencyInjection
         services.AddSingleton<
             ITokenService,
             JwtTokenService>();
+
+        services.AddScoped<DevelopmentDataSeeder>();
 
         return services;
     }

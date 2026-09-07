@@ -1,72 +1,36 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using RealTimeOpsPortal.Api.Extensions;
 using RealTimeOpsPortal.Application;
 using RealTimeOpsPortal.Infrastructure;
-using System.Text;
+using RealTimeOpsPortal.Infrastructure.Persistence.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddInfrastructure(builder.Configuration);
+// Core services
+builder.Services.AddControllers();
+
+// Application layers
 builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
+// Authentication / Authorization
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-#region Configure JWT Authentication
-var jwtKey =
-    builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException(
-        "JWT key is missing.");
-
-var jwtIssuer =
-    builder.Configuration["Jwt:Issuer"]
-    ?? throw new InvalidOperationException(
-        "JWT issuer is missing.");
-
-var jwtAudience =
-    builder.Configuration["Jwt:Audience"]
-    ?? throw new InvalidOperationException(
-        "JWT audience is missing.");
-
-builder.Services
-    .AddAuthentication(
-        JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters =
-            new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = jwtIssuer,
-
-                ValidateAudience = true,
-                ValidAudience = jwtAudience,
-
-                ValidateIssuerSigningKey = true,
-
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            jwtKey)),
-
-                ValidateLifetime = true,
-
-                ClockSkew = TimeSpan.Zero
-            };
-    });
-
-builder.Services.AddAuthorization();
-#endregion
-
+// Swagger
+builder.Services.AddSwaggerDocumentation();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwaggerDocumentation();
+
+    await using var scope = app.Services.CreateAsyncScope();
+
+    var seeder =
+        scope.ServiceProvider
+            .GetRequiredService<DevelopmentDataSeeder>();
+
+    await seeder.SeedAsync();
 }
 
 app.UseHttpsRedirection();
@@ -77,4 +41,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
