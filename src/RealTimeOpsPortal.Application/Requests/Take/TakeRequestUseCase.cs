@@ -1,4 +1,6 @@
-﻿using RealTimeOpsPortal.Application.Requests;
+﻿using Microsoft.Extensions.Logging;
+using RealTimeOpsPortal.Application.Notifications;
+using RealTimeOpsPortal.Application.Requests;
 using RealTimeOpsPortal.Domain.Requests;
 
 namespace RealTimeOpsPortal.Application.Requests.Take;
@@ -9,10 +11,14 @@ namespace RealTimeOpsPortal.Application.Requests.Take;
 public class TakeRequestUseCase
 {
     private readonly IServiceRequestRepository _serviceRequestRepository;
+    private readonly IRequestNotificationService _notificationService;
 
-    public TakeRequestUseCase(IServiceRequestRepository serviceRequestRepository)
+    public TakeRequestUseCase(
+        IServiceRequestRepository serviceRequestRepository,
+        IRequestNotificationService notificationService)
     {
         _serviceRequestRepository = serviceRequestRepository;
+        _notificationService = notificationService;
     }
 
     /// <summary>
@@ -70,6 +76,16 @@ public class TakeRequestUseCase
         {
             throw;
         }
+
+        await _notificationService
+    .NotifyRequestAssignedAsync(
+        new RequestAssignedNotification(
+            command.RequestId,
+            serviceRequest.RequestNumber,
+            serviceRequest.CustomerId,
+            command.AgentId,
+            DateTime.UtcNow),
+        cancellationToken);
 
         // Return success result
         return new TakeRequestResult

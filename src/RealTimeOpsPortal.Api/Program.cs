@@ -1,4 +1,5 @@
 using RealTimeOpsPortal.Api.Extensions;
+using RealTimeOpsPortal.Api.Hubs;
 using RealTimeOpsPortal.Api.Middleware;
 using RealTimeOpsPortal.Application;
 using RealTimeOpsPortal.Infrastructure;
@@ -19,6 +20,8 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddCurrentUserContext();
 
 builder.Services.AddPortalAuthorization();
+
+builder.Services.AddPortalSignalR();
 
 // Swagger
 builder.Services.AddSwaggerDocumentation();
@@ -45,5 +48,7 @@ app.UseMiddleware<CurrentUserMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<OperationsHub>("/hubs/operations");
 
 app.Run();
