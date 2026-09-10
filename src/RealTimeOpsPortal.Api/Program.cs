@@ -1,4 +1,5 @@
 using RealTimeOpsPortal.Api.Extensions;
+using RealTimeOpsPortal.Api.Middleware;
 using RealTimeOpsPortal.Application;
 using RealTimeOpsPortal.Infrastructure;
 using RealTimeOpsPortal.Infrastructure.Persistence.Seed;
@@ -14,6 +15,10 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 // Authentication / Authorization
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.AddCurrentUserContext();
+
+builder.Services.AddPortalAuthorization();
 
 // Swagger
 builder.Services.AddSwaggerDocumentation();
@@ -36,6 +41,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseMiddleware<CurrentUserMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

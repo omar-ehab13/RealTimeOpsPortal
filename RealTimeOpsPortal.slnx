@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Scripts/">
+    <File Path="ef-migrations.ps1" />
+    <File Path="update-database.ps1" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/RealTimeOpsPortal.Api/RealTimeOpsPortal.Api.csproj" />
     <Project Path="src/RealTimeOpsPortal.Application/RealTimeOpsPortal.Application.csproj" />

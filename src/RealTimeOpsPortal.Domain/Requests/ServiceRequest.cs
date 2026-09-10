@@ -29,20 +29,13 @@ public class ServiceRequest
     {
     }
 
-    public ServiceRequest(
-        Guid customerId,
-        string description,
-        RequestPriority priority)
+    public ServiceRequest(Guid customerId, string description, RequestPriority priority)
     {
         if (customerId == Guid.Empty)
-            throw new ArgumentException(
-                "Customer ID is required.",
-                nameof(customerId));
+            throw new ArgumentException("Customer ID is required.", nameof(customerId));
 
         if (string.IsNullOrWhiteSpace(description))
-            throw new ArgumentException(
-                "Description is required.",
-                nameof(description));
+            throw new ArgumentException("Description is required.", nameof(description));
 
         Id = Guid.NewGuid();
 
@@ -64,15 +57,61 @@ public class ServiceRequest
             changedByUserId: customerId);
     }
 
+    public void AssignTo(Guid employeeId, Guid performedByUserId)
+    {
+        if (employeeId == Guid.Empty)
+            throw new ArgumentException("Employee ID is required.", nameof(employeeId));
+
+        if (AssignedUserId.HasValue)
+            throw new InvalidOperationException("Request is already assigned.");
+
+        AssignedUserId = employeeId;
+
+        ChangeStatus(RequestStatus.Assigned, performedByUserId);
+    }
+
+    public void ChangeStatus(RequestStatus newStatus, Guid changedByUserId)
+    {
+        if (changedByUserId == Guid.Empty)
+            throw new ArgumentException("Changed by user ID is required.", nameof(changedByUserId));
+
+        if (Status == newStatus)
+            return;
+
+        if (!CanTransitionTo(newStatus))
+        {
+            throw new InvalidOperationException($"Cannot change request status from {Status} to {newStatus}.");
+        }
+
+        var previousStatus = Status;
+
+        Status = newStatus;
+        UpdatedAtUtc = DateTime.UtcNow;
+
+        AddStatusHistory(previousStatus, newStatus, changedByUserId);
+    }
+
+    public void Take(Guid agentId)
+    {
+        if (agentId == Guid.Empty)
+            throw new ArgumentException("Agent ID is required.", nameof(agentId));
+
+        if (AssignedUserId.HasValue)
+        {
+            throw new InvalidOperationException("Request is already assigned.");
+        }
+
+        AssignedUserId = agentId;
+
+        ChangeStatus(RequestStatus.Assigned, agentId);
+    }
+
     private string GenerateRequestNumber()
     {
         return $"REQ-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(10000, 99999)}";
     }
 
-    private void AddStatusHistory(
-        RequestStatus? fromStatus,
-        RequestStatus toStatus,
-        Guid changedByUserId)
+    private void AddStatusHistory(RequestStatus? fromStatus, RequestStatus toStatus, Guid changedByUserId)
     {
         _statusHistory.Add(
             new RequestStatusHistory(
@@ -81,55 +120,6 @@ public class ServiceRequest
                 toStatus,
                 changedByUserId,
                 DateTime.UtcNow));
-    }
-
-    public void AssignTo(
-    Guid employeeId,
-    Guid performedByUserId)
-    {
-        if (employeeId == Guid.Empty)
-            throw new ArgumentException(
-                "Employee ID is required.",
-                nameof(employeeId));
-
-        if (AssignedUserId.HasValue)
-            throw new InvalidOperationException(
-                "Request is already assigned.");
-
-        AssignedUserId = employeeId;
-
-        ChangeStatus(
-            RequestStatus.Assigned,
-            performedByUserId);
-    }
-
-    public void ChangeStatus(
-    RequestStatus newStatus,
-    Guid changedByUserId)
-    {
-        if (changedByUserId == Guid.Empty)
-            throw new ArgumentException(
-                "Changed by user ID is required.",
-                nameof(changedByUserId));
-
-        if (Status == newStatus)
-            return;
-
-        if (!CanTransitionTo(newStatus))
-        {
-            throw new InvalidOperationException(
-                $"Cannot change request status from {Status} to {newStatus}.");
-        }
-
-        var previousStatus = Status;
-
-        Status = newStatus;
-        UpdatedAtUtc = DateTime.UtcNow;
-
-        AddStatusHistory(
-            previousStatus,
-            newStatus,
-            changedByUserId);
     }
 
     private bool CanTransitionTo(RequestStatus newStatus)
